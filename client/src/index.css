@@ -1,0 +1,73 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #05060a;
+  --color-surface: #0e1117;
+  --color-surface-2: #151a23;
+  --color-primary: #6366f1;
+  --color-primary-2: #22d3ee;
+  --color-accent: #a855f7;
+  --color-success: #34d399;
+  --color-warning: #fbbf24;
+  --color-text: #f1f5f9;
+  --color-muted: #94a3b8;
+  --font-sans: "Plus Jakarta Sans", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply m-0 bg-bg font-sans text-text antialiased;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  * {
+    @apply box-border;
+  }
+
+  a {
+    @apply transition-colors duration-200;
+  }
+
+  button,
+  input,
+  textarea {
+    font: inherit;
+  }
+
+  ::selection {
+    background: rgba(99, 102, 241, 0.4);
+    color: #fff;
+  }
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.container-shell {
+  @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+}
+
+.section-shell {
+  @apply rounded-3xl border border-white/10 bg-surface/80 p-6 shadow-[0_20px_80px_rgba(0,0,0,0.35)] backdrop-blur xl:p-8;
+}
+
+.glass-panel {
+  @apply border border-white/10 bg-white/5 backdrop-blur-xl;
+}
+
+.terminal-line {
+  @apply font-mono text-sm leading-7 text-primary-2 sm:text-base;
+}
+
+.gradient-text {
+  @apply bg-gradient-to-r from-primary via-accent to-primary-2 bg-clip-text text-transparent;
+}
