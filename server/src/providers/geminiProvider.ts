@@ -11,7 +11,7 @@ export const geminiProvider: LlmProvider = {
     return Boolean(env.GEMINI_API_KEY);
   },
   async generate({ systemPrompt, userMessage, context }) {
-    const model = env.LLM_MODEL || 'gemini-1.5-flash';
+    const model = env.LLM_MODEL || 'gemini-3.5-flash-lite';
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${env.GEMINI_API_KEY}`,
       {
