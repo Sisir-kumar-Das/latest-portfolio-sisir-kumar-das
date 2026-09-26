@@ -11,7 +11,15 @@ export const app = express();
 app.use(helmet());
 app.use(
   cors({
-    origin: env.CLIENT_ORIGIN,
+    origin(origin, callback) {
+      // Allow non-browser tools (curl, health checks) that send no Origin header.
+      if (!origin || env.CLIENT_ORIGINS.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error(`Origin "${origin}" is not allowed by CORS.`));
+    },
   })
 );
 app.use(express.json());

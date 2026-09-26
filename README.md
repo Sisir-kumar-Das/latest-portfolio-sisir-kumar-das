@@ -5,7 +5,9 @@ production experience. Built as a React + Node/Express + MongoDB monorepo, with 
 an embedded **multi-agent, multi-tool AI concierge** that can answer visitor questions about my
 experience, projects and skills in real time.
 
-See [ARCHITECTURE.md](./ARCHITECTURE.md) for a full breakdown of the multi-agent system design.
+See [ARCHITECTURE.md](./ARCHITECTURE.md) for a full breakdown of the multi-agent system design,
+and [DEPLOYMENT.md](./DEPLOYMENT.md) for how to deploy it for free with an auto-updating CI/CD
+pipeline (Vercel + Render + MongoDB Atlas).
 
 ## ✨ Highlights
 

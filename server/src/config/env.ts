@@ -27,7 +27,12 @@ const normalizeProvider = (value: string | undefined): SupportedLlmProvider => {
 
 export const env = {
   PORT: parsePort(process.env.PORT),
-  CLIENT_ORIGIN: process.env.CLIENT_ORIGIN?.trim() || 'http://localhost:5173',
+  // Comma-separated list supported so both the local Vite dev origin and a
+  // deployed frontend origin (e.g. Vercel) can be allowed simultaneously.
+  CLIENT_ORIGINS: (process.env.CLIENT_ORIGIN?.trim() || 'http://localhost:5173')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean),
   MONGODB_URI: process.env.MONGODB_URI?.trim() || '',
   LLM_PROVIDER: normalizeProvider(process.env.LLM_PROVIDER),
   OPENAI_API_KEY: process.env.OPENAI_API_KEY?.trim() || '',
