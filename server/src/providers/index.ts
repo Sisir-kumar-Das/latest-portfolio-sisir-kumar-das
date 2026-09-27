@@ -19,7 +19,25 @@ export const getLlmProvider = (): LlmProvider => {
   const provider = providers[env.LLM_PROVIDER];
 
   if (provider && provider.isConfigured()) {
-    return provider;
+    if (provider.name === 'mock') {
+      return provider;
+    }
+
+    return {
+      name: provider.name,
+      isConfigured: () => true,
+      async generate(params) {
+        try {
+          return await provider.generate(params);
+        } catch (error) {
+          const message = error instanceof Error ? error.message : 'Provider failure';
+          console.warn(
+            `Provider "${provider.name}" failed (${message}). Falling back to mock provider.`
+          );
+          return await mockProvider.generate(params);
+        }
+      },
+    };
   }
 
   if (env.LLM_PROVIDER !== 'mock') {

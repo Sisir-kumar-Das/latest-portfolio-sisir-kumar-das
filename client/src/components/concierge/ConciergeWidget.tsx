@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { BotMessageSquare, Send, Sparkles, X } from 'lucide-react'
+import { BotMessageSquare, RotateCcw, Send, Sparkles, X } from 'lucide-react'
 import { api } from '../../lib/api'
+import { generateClientFallbackReply } from '../../lib/clientConciergeFallback'
 import Badge from '../ui/Badge'
 import ChatMessage, { type ChatMessageItem } from './ChatMessage'
 
@@ -47,6 +48,7 @@ function ConciergeWidget({ isOpen, onToggle, onOpen }: ConciergeWidgetProps) {
   const [messages, setMessages] = useState<ChatMessageItem[]>([welcomeMessage])
   const [inputValue, setInputValue] = useState('')
   const [isSending, setIsSending] = useState(false)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const assistantHint = useMemo(
     () => 'Ask me about Sisir’s experience, skills, or projects',
@@ -56,6 +58,19 @@ function ConciergeWidget({ isOpen, onToggle, onOpen }: ConciergeWidgetProps) {
   useEffect(() => {
     window.localStorage.setItem(sessionStorageKey, sessionId)
   }, [sessionId])
+
+  useEffect(() => {
+    if (isOpen) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }
+  }, [messages, isSending, isOpen])
+
+  const handleReset = () => {
+    const newSession = window.crypto?.randomUUID?.() ?? `session-${Date.now()}`
+    setSessionId(newSession)
+    window.localStorage.setItem(sessionStorageKey, newSession)
+    setMessages([welcomeMessage])
+  }
 
   const handleSubmit = async () => {
     const message = inputValue.trim()
@@ -89,15 +104,16 @@ function ConciergeWidget({ isOpen, onToggle, onOpen }: ConciergeWidgetProps) {
         },
       ])
     } catch {
+      // Smart offline fallback grounded in Sisir's real portfolio data
+      const fallback = generateClientFallbackReply(message)
       setMessages((current) => [
         ...current,
         {
-          id: `${Date.now()}-error`,
+          id: `${Date.now()}-assistant-fallback`,
           role: 'assistant',
-          content:
-            "Sorry, I couldn't reach the server — please make sure the backend is running.",
-          agent: 'Offline fallback',
-          isError: true,
+          content: `${fallback.reply}\n\n*(Note: Live backend is currently unreachable or waking up; answered via local assistant)*`,
+          agent: fallback.agent,
+          toolsUsed: fallback.toolsUsed,
         },
       ])
     } finally {
@@ -121,14 +137,25 @@ function ConciergeWidget({ isOpen, onToggle, onOpen }: ConciergeWidgetProps) {
                 <h3 className="text-lg font-semibold text-white">AI Concierge</h3>
                 <p className="mt-1 text-sm text-muted">{assistantHint}</p>
               </div>
-              <button
-                type="button"
-                onClick={onToggle}
-                className="rounded-full border border-white/10 bg-white/5 p-2 text-muted hover:text-white"
-                aria-label="Close AI concierge"
-              >
-                <X size={18} />
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  className="rounded-full border border-white/10 bg-white/5 p-2 text-muted hover:text-white"
+                  title="Reset conversation"
+                  aria-label="Reset conversation"
+                >
+                  <RotateCcw size={16} />
+                </button>
+                <button
+                  type="button"
+                  onClick={onToggle}
+                  className="rounded-full border border-white/10 bg-white/5 p-2 text-muted hover:text-white"
+                  aria-label="Close AI concierge"
+                >
+                  <X size={18} />
+                </button>
+              </div>
             </div>
 
             <div className="max-h-[26rem] space-y-3 overflow-y-auto bg-surface/95 px-4 py-4">
@@ -142,14 +169,24 @@ function ConciergeWidget({ isOpen, onToggle, onOpen }: ConciergeWidgetProps) {
                   </div>
                 </div>
               ) : null}
+              <div ref={messagesEndRef} />
             </div>
 
             <div className="border-t border-white/10 bg-surface-2/90 p-4">
-              <div className="mb-3 flex items-center gap-2">
-                <Badge tone="accent">session</Badge>
-                <p className="truncate font-mono text-[11px] uppercase tracking-[0.2em] text-muted">
-                  {sessionId}
-                </p>
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <Badge tone="accent">session</Badge>
+                  <p className="truncate font-mono text-[11px] uppercase tracking-[0.2em] text-muted max-w-[12rem]">
+                    {sessionId}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  className="text-[11px] font-mono uppercase tracking-[0.15em] text-muted hover:text-white transition-colors"
+                >
+                  Clear
+                </button>
               </div>
               <div className="flex items-end gap-3">
                 <textarea

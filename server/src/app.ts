@@ -13,13 +13,32 @@ app.use(
   cors({
     origin(origin, callback) {
       // Allow non-browser tools (curl, health checks) that send no Origin header.
-      if (!origin || env.CLIENT_ORIGINS.includes(origin)) {
+      if (!origin) {
         callback(null, true);
         return;
       }
 
-      callback(new Error(`Origin "${origin}" is not allowed by CORS.`));
+      // Check configured origins
+      if (env.CLIENT_ORIGINS.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      // Support local dev on any port (localhost / 127.0.0.1)
+      if (/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      // Support preview and production deployments on Vercel
+      if (/^https:\/\/.*\.vercel\.app$/.test(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(null, false);
     },
+    credentials: true,
   })
 );
 app.use(express.json());

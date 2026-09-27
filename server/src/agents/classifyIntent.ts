@@ -32,8 +32,15 @@ export const classifyIntent = (message: string): Intent => {
       'background',
       'resume',
       'about you',
+      'about sisir',
+      'who is',
+      'who are you',
+      'tell me about',
       'tech stack',
       'years',
+      'education',
+      'college',
+      'degree',
     ])
   ) {
     return 'profile';
